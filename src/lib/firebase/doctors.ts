@@ -15,8 +15,14 @@ import { Doctor } from '../types/auth'
 const DOCTORS_COLLECTION = 'doctors'
 
 export const getAllDoctors = async (): Promise<Doctor[]> => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const querySnapshot = await getDocs(collection(db, DOCTORS_COLLECTION))
+    const querySnapshot = await getDocs(collection(dbInstance, DOCTORS_COLLECTION))
     return querySnapshot.docs.map(doc => {
       const data = doc.data()
       return {
@@ -31,9 +37,15 @@ export const getAllDoctors = async (): Promise<Doctor[]> => {
 }
 
 export const getAvailableDoctors = async (): Promise<Doctor[]> => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
     const q = query(
-      collection(db, DOCTORS_COLLECTION),
+      collection(dbInstance, DOCTORS_COLLECTION),
       where('isAvailable', '==', true)
     )
     
@@ -52,8 +64,14 @@ export const getAvailableDoctors = async (): Promise<Doctor[]> => {
 }
 
 export const getDoctorById = async (doctorId: string): Promise<Doctor | null> => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const doctorRef = doc(db, DOCTORS_COLLECTION, doctorId)
+    const doctorRef = doc(dbInstance, DOCTORS_COLLECTION, doctorId)
     const doctorDoc = await getDoc(doctorRef)
     
     if (!doctorDoc.exists()) {
@@ -72,8 +90,14 @@ export const getDoctorById = async (doctorId: string): Promise<Doctor | null> =>
 }
 
 export const updateDoctorAvailability = async (doctorId: string, isAvailable: boolean) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const doctorRef = doc(db, DOCTORS_COLLECTION, doctorId)
+    const doctorRef = doc(dbInstance, DOCTORS_COLLECTION, doctorId)
     await updateDoc(doctorRef, { isAvailable })
   } catch (error) {
     throw new Error(`Failed to update doctor availability: ${error}`)
@@ -81,8 +105,14 @@ export const updateDoctorAvailability = async (doctorId: string, isAvailable: bo
 }
 
 export const updateCurrentPatient = async (doctorId: string, patientId: string | null) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const doctorRef = doc(db, DOCTORS_COLLECTION, doctorId)
+    const doctorRef = doc(dbInstance, DOCTORS_COLLECTION, doctorId)
     await updateDoc(doctorRef, { currentPatient: patientId })
   } catch (error) {
     throw new Error(`Failed to update current patient: ${error}`)
@@ -90,8 +120,15 @@ export const updateCurrentPatient = async (doctorId: string, patientId: string |
 }
 
 export const listenToAvailableDoctors = (callback: (doctors: Doctor[]) => void) => {
+  if (!db) {
+    callback([])
+    return () => {}
+  }
+  
+  const dbInstance = db
+  
   const q = query(
-    collection(db, DOCTORS_COLLECTION),
+    collection(dbInstance, DOCTORS_COLLECTION),
     where('isAvailable', '==', true)
   )
 

@@ -17,8 +17,14 @@ import { Appointment } from '../types/appointment'
 const APPOINTMENTS_COLLECTION = 'appointments'
 
 export const createAppointment = async (appointmentData: Omit<Appointment, 'id' | 'createdAt'>) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const docRef = await addDoc(collection(db, APPOINTMENTS_COLLECTION), {
+    const docRef = await addDoc(collection(dbInstance, APPOINTMENTS_COLLECTION), {
       ...appointmentData,
       appointmentDate: Timestamp.fromDate(appointmentData.appointmentDate),
       estimatedTime: appointmentData.estimatedTime ? Timestamp.fromDate(appointmentData.estimatedTime) : null,
@@ -31,12 +37,18 @@ export const createAppointment = async (appointmentData: Omit<Appointment, 'id' 
 }
 
 export const getAppointmentsByDoctor = async (doctorId: string, date: Date = new Date()) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
     const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
     const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
     
     const q = query(
-      collection(db, APPOINTMENTS_COLLECTION),
+      collection(dbInstance, APPOINTMENTS_COLLECTION),
       where('doctorId', '==', doctorId),
       where('appointmentDate', '>=', Timestamp.fromDate(startOfDay)),
       where('appointmentDate', '<', Timestamp.fromDate(endOfDay)),
@@ -60,9 +72,15 @@ export const getAppointmentsByDoctor = async (doctorId: string, date: Date = new
 }
 
 export const getPatientAppointments = async (patientPhone: string) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
     const q = query(
-      collection(db, APPOINTMENTS_COLLECTION),
+      collection(dbInstance, APPOINTMENTS_COLLECTION),
       where('patientPhone', '==', patientPhone)
     )
     
@@ -92,8 +110,14 @@ export const getPatientAppointments = async (patientPhone: string) => {
 }
 
 export const updateAppointmentStatus = async (appointmentId: string, status: Appointment['status']) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const appointmentRef = doc(db, APPOINTMENTS_COLLECTION, appointmentId)
+    const appointmentRef = doc(dbInstance, APPOINTMENTS_COLLECTION, appointmentId)
     await updateDoc(appointmentRef, { status })
   } catch (error) {
     throw new Error(`Failed to update appointment status: ${error}`)
@@ -105,11 +129,18 @@ export const listenToAppointmentsByDoctor = (
   callback: (appointments: Appointment[]) => void,
   date: Date = new Date()
 ) => {
+  if (!db) {
+    callback([])
+    return () => {}
+  }
+  
+  const dbInstance = db
+  
   const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
   const endOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1)
   
   const q = query(
-    collection(db, APPOINTMENTS_COLLECTION),
+    collection(dbInstance, APPOINTMENTS_COLLECTION),
     where('doctorId', '==', doctorId),
     where('appointmentDate', '>=', Timestamp.fromDate(startOfDay)),
     where('appointmentDate', '<', Timestamp.fromDate(endOfDay)),
@@ -135,9 +166,16 @@ export const listenToPatientAppointments = (
   patientPhone: string,
   callback: (appointments: Appointment[]) => void
 ) => {
+  if (!db) {
+    callback([])
+    return () => {}
+  }
+  
+  const dbInstance = db
+  
   // Simplified query to avoid index requirements
   const q = query(
-    collection(db, APPOINTMENTS_COLLECTION),
+    collection(dbInstance, APPOINTMENTS_COLLECTION),
     where('patientPhone', '==', patientPhone)
   )
 

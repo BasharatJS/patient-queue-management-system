@@ -16,8 +16,14 @@ import { QueueItem } from '../types/queue'
 const QUEUE_COLLECTION = 'queue'
 
 export const addToQueue = async (queueData: Omit<QueueItem, 'id' | 'createdAt'>) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const docRef = await addDoc(collection(db, QUEUE_COLLECTION), {
+    const docRef = await addDoc(collection(dbInstance, QUEUE_COLLECTION), {
       ...queueData,
       createdAt: Timestamp.now(),
     })
@@ -28,10 +34,16 @@ export const addToQueue = async (queueData: Omit<QueueItem, 'id' | 'createdAt'>)
 }
 
 export const getCurrentQueueByDoctor = async (doctorId: string) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
     // Simplified query to avoid index requirements
     const q = query(
-      collection(db, QUEUE_COLLECTION),
+      collection(dbInstance, QUEUE_COLLECTION),
       where('doctorId', '==', doctorId)
     )
     
@@ -55,9 +67,15 @@ export const getCurrentQueueByDoctor = async (doctorId: string) => {
 }
 
 export const getCurrentQueueNumber = async (doctorId: string): Promise<number> => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
     const q = query(
-      collection(db, QUEUE_COLLECTION),
+      collection(dbInstance, QUEUE_COLLECTION),
       where('doctorId', '==', doctorId)
     )
     
@@ -77,9 +95,15 @@ export const getCurrentQueueNumber = async (doctorId: string): Promise<number> =
 }
 
 export const getNextQueueNumber = async (doctorId: string): Promise<number> => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
     const q = query(
-      collection(db, QUEUE_COLLECTION),
+      collection(dbInstance, QUEUE_COLLECTION),
       where('doctorId', '==', doctorId)
     )
     
@@ -99,8 +123,14 @@ export const getNextQueueNumber = async (doctorId: string): Promise<number> => {
 }
 
 export const updateQueueItemStatus = async (queueId: string, status: QueueItem['status']) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const queueRef = doc(db, QUEUE_COLLECTION, queueId)
+    const queueRef = doc(dbInstance, QUEUE_COLLECTION, queueId)
     await updateDoc(queueRef, { status })
   } catch (error) {
     throw new Error(`Failed to update queue status: ${error}`)
@@ -108,10 +138,16 @@ export const updateQueueItemStatus = async (queueId: string, status: QueueItem['
 }
 
 export const updateQueueItemStatusByAppointmentId = async (appointmentId: string, status: QueueItem['status']) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
     // Find queue item by appointmentId
     const queueQuery = query(
-      collection(db, QUEUE_COLLECTION),
+      collection(dbInstance, QUEUE_COLLECTION),
       where('appointmentId', '==', appointmentId)
     )
     
@@ -129,10 +165,16 @@ export const updateQueueItemStatusByAppointmentId = async (appointmentId: string
 }
 
 export const moveToNext = async (doctorId: string) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
     // Get all queue items for this doctor to avoid complex index requirements
     const allQueueQuery = query(
-      collection(db, QUEUE_COLLECTION),
+      collection(dbInstance, QUEUE_COLLECTION),
       where('doctorId', '==', doctorId)
     )
     
@@ -183,8 +225,15 @@ export const moveToNext = async (doctorId: string) => {
 }
 
 export const listenToQueue = (doctorId: string, callback: (queue: QueueItem[]) => void) => {
+  if (!db) {
+    callback([])
+    return () => {}
+  }
+  
+  const dbInstance = db
+  
   const q = query(
-    collection(db, QUEUE_COLLECTION),
+    collection(dbInstance, QUEUE_COLLECTION),
     where('doctorId', '==', doctorId)
   )
 
@@ -208,8 +257,15 @@ export const listenToQueue = (doctorId: string, callback: (queue: QueueItem[]) =
 }
 
 export const listenToCurrentQueueNumber = (doctorId: string, callback: (currentNumber: number) => void) => {
+  if (!db) {
+    callback(0)
+    return () => {}
+  }
+  
+  const dbInstance = db
+  
   const q = query(
-    collection(db, QUEUE_COLLECTION),
+    collection(dbInstance, QUEUE_COLLECTION),
     where('doctorId', '==', doctorId)
   )
 

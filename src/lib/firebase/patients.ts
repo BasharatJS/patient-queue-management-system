@@ -16,8 +16,14 @@ import { Patient } from '../types/patient'
 const PATIENTS_COLLECTION = 'patients'
 
 export const createPatient = async (patientData: Omit<Patient, 'id' | 'createdAt'>) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const docRef = await addDoc(collection(db, PATIENTS_COLLECTION), {
+    const docRef = await addDoc(collection(dbInstance, PATIENTS_COLLECTION), {
       ...patientData,
       createdAt: Timestamp.now(),
     })
@@ -28,9 +34,15 @@ export const createPatient = async (patientData: Omit<Patient, 'id' | 'createdAt
 }
 
 export const getPatientByPhone = async (phone: string): Promise<Patient | null> => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
     const q = query(
-      collection(db, PATIENTS_COLLECTION),
+      collection(dbInstance, PATIENTS_COLLECTION),
       where('phone', '==', phone)
     )
     
@@ -52,8 +64,14 @@ export const getPatientByPhone = async (phone: string): Promise<Patient | null> 
 }
 
 export const getPatientById = async (patientId: string): Promise<Patient | null> => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const patientRef = doc(db, PATIENTS_COLLECTION, patientId)
+    const patientRef = doc(dbInstance, PATIENTS_COLLECTION, patientId)
     const patientDoc = await getDoc(patientRef)
     
     if (!patientDoc.exists()) {
@@ -72,8 +90,14 @@ export const getPatientById = async (patientId: string): Promise<Patient | null>
 }
 
 export const updatePatient = async (patientId: string, updateData: Partial<Patient>) => {
+  if (!db) {
+    throw new Error('Firebase not initialized')
+  }
+  
+  const dbInstance = db
+  
   try {
-    const patientRef = doc(db, PATIENTS_COLLECTION, patientId)
+    const patientRef = doc(dbInstance, PATIENTS_COLLECTION, patientId)
     await updateDoc(patientRef, updateData)
   } catch (error) {
     throw new Error(`Failed to update patient: ${error}`)
