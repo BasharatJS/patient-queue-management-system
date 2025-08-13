@@ -40,9 +40,11 @@ const testFirebase = async () => {
       console.log('⚠️  No doctors found. Run: npm run setup-firebase')
     } else {
       console.log('📋 Doctors found:')
-      doctorsSnapshot.forEach((doc, index) => {
+      let index = 0
+      doctorsSnapshot.forEach((doc) => {
         const data = doc.data()
         console.log(`${index + 1}. ${data.name} - ${data.specialization}`)
+        index++
       })
     }
 
