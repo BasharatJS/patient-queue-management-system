@@ -10,16 +10,23 @@ import { auth, db } from './config'
 import { User } from '../types/auth'
 
 export const signIn = async (email: string, password: string) => {
+  if (!auth || !db) {
+    throw new Error('Firebase not initialized')
+  }
+
+  const authInstance = auth
+  const dbInstance = db
+
   try {
     const userCredential = await signInWithEmailAndPassword(
-      auth,
+      authInstance,
       email,
       password
     )
     const user = userCredential.user
 
     // Get user data from Firestore
-    const userDocRef = doc(db, 'users', user.uid)
+    const userDocRef = doc(dbInstance, 'users', user.uid)
     const userDoc = await getDoc(userDocRef)
 
     if (userDoc.exists()) {
@@ -37,18 +44,32 @@ export const signIn = async (email: string, password: string) => {
 }
 
 export const signOut = async () => {
+  if (!auth) {
+    throw new Error('Firebase not initialized')
+  }
+
+  const authInstance = auth
+
   try {
-    await firebaseSignOut(auth)
+    await firebaseSignOut(authInstance)
   } catch (error: any) {
     throw new Error(error.message)
   }
 }
 
 export const getCurrentUser = (callback: (user: User | null) => void) => {
-  return onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+  if (!auth || !db) {
+    callback(null)
+    return () => {}
+  }
+  
+  const authInstance = auth
+  const dbInstance = db
+  
+  return onAuthStateChanged(authInstance, async (firebaseUser: FirebaseUser | null) => {
     if (firebaseUser) {
       try {
-        const userDocRef = doc(db, 'users', firebaseUser.uid)
+        const userDocRef = doc(dbInstance, 'users', firebaseUser.uid)
         const userDoc = await getDoc(userDocRef)
 
         if (userDoc.exists()) {

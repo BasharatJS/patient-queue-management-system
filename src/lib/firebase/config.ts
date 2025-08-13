@@ -1,5 +1,5 @@
 // lib/firebase/config.ts
-import { initializeApp } from 'firebase/app'
+import { initializeApp, getApps, getApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
@@ -12,7 +12,13 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 }
 
-const app = initializeApp(firebaseConfig)
-export const auth = getAuth(app)
-export const db = getFirestore(app)
+// Initialize Firebase only on client side
+const getFirebaseApp = () => {
+  if (typeof window === 'undefined') return null
+  return getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
+}
+
+const app = getFirebaseApp()
+export const auth = app ? getAuth(app) : null
+export const db = app ? getFirestore(app) : null
 export default app
